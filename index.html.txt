@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholarly Roots — Journal Reading Community</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400;1,600&family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #0E1117;
+    --ink-mid:    #2B2D35;
+    --ink-soft:   #4A4D5A;
+    --cream:      #F5F0E8;
+    --cream-dark: #EDE6D6;
+    --gold:       #B8860B;
+    --gold-light: #D4A820;
+    --gold-pale:  #F5E8B4;
+    --rust:       #C0422A;
+    --navy:       #1B3A6B;
+    --sage:       #5C7A5F;
+    --white:      #FFFDF8;
+    --rule:       rgba(184,134,11,0.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    background: var(--white);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  /* ════════════════════════════
+     NAV
+  ════════════════════════════ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,253,248,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 5vw;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    transition: box-shadow .3s;
+  }
+  nav.scrolled { box-shadow: 0 2px 24px rgba(0,0,0,.08); }
+
+  .nav-brand {
+    display: flex; align-items: baseline; gap: 10px;
+    text-decoration: none;
+  }
+  .nav-brand-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    color: var(--navy);
+    letter-spacing: .02em;
+  }
+  .nav-brand-sub {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: .65rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .nav-links {
+    display: flex; gap: 2.4rem; list-style: none; align-items: center;
+  }
+  .nav-links a {
+    text-decoration: none;
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    transition: color .2s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
+    height: 1px; background: var(--gold);
+    transform: scaleX(0); transform-origin: right;
+    transition: transform .3s ease;
+  }
+  .nav-links a:hover { color: var(--navy); }
+  .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+  .nav-cta {
+    background: var(--navy);
+    color: var(--cream) !important;
+    padding: .45rem 1.2rem;
+    border-radius: 2px;
+    letter-spacing: .08em !important;
+  }
+  .nav-cta:hover { background: var(--gold) !important; color: var(--white) !important; }
+  .nav-cta::after { display: none !important; }
+
+  .nav-hamburger {
+    display: none; cursor: pointer; flex-direction: column; gap: 5px; background: none; border: none;
+  }
+  .nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--ink); transition: .3s; }
+
+  /* ════════════════════════════
+     HERO
+  ════════════════════════════ */
+  #hero {
+    min-height: 100vh;
+    background: var(--ink);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 5vw 80px 8vw;
+    position: relative; z-index: 2;
+  }
+
+  .hero-eyebrow {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 2rem;
+    opacity: 0; animation: fadeUp .8s .2s forwards;
+  }
+  .hero-eyebrow-line {
+    width: 40px; height: 1px; background: var(--gold);
+  }
+  .hero-eyebrow-text {
+    font-size: .7rem;
+    font-weight: 500;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(3.2rem, 5.5vw, 5.5rem);
+    line-height: 1.02;
+    color: var(--cream);
+    margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp .8s .4s forwards;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .hero-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: rgba(245,240,232,.7);
+    max-width: 460px;
+    margin-bottom: 3rem;
+    opacity: 0; animation: fadeUp .8s .6s forwards;
+  }
+
+  .hero-btns {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    opacity: 0; animation: fadeUp .8s .8s forwards;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: .6rem;
+    background: var(--gold);
+    color: var(--ink);
+    padding: .9rem 2rem;
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: none; cursor: pointer;
+    transition: background .25s, transform .2s;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: .6rem;
+    background: transparent;
+    color: var(--cream);
+    padding: .9rem 2rem;
+    font-size: .8rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid rgba(245,240,232,.3);
+    cursor: pointer;
+    transition: border-color .25s, color .25s, background .25s;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  .hero-stats {
+    display: flex; gap: 2.5rem; margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(184,134,11,.2);
+    opacity: 0; animation: fadeUp .8s 1s forwards;
+  }
+  .hero-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--gold-light);
+    line-height: 1;
+  }
+  .hero-stat-label {
+    font-size: .65rem;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,.5);
+    margin-top: 4px;
+  }
+
+  /* Hero right — decorative book-shelf illustration */
+  .hero-right {
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-bg-art {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #0e1117 0%, #1b3a6b 50%, #0e1117 100%);
+    opacity: .6;
+  }
+  .hero-grid-lines {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(184,134,11,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(184,134,11,.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: .25;
+  }
+  .hero-orb-1 { width: 400px; height: 400px; background: var(--navy); top: 10%; left: 20%; }
+  .hero-orb-2 { width: 300px; height: 300px; background: var(--gold); bottom: 20%; right: 10%; }
+
+  .hero-card-stack {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; gap: 1.2rem;
+    padding: 2rem;
+    opacity: 0; animation: fadeIn .8s 1.2s forwards;
+  }
+  .journal-card {
+    background: rgba(255,253,248,.06);
+    border: 1px solid rgba(184,134,11,.25);
+    backdrop-filter: blur(8px);
+    padding: 1.4rem 1.8rem;
+    width: 340px;
+    position: relative;
+    transition: transform .3s, border-color .3s;
+    cursor: default;
+  }
+  .journal-card:hover { transform: translateX(8px); border-color: var(--gold); }
+  .journal-card:nth-child(2) { margin-left: 30px; }
+  .journal-card:nth-child(3) { margin-left: 60px; }
+  .jc-rank {
+    position: absolute; top: -1px; left: -1px;
+    background: var(--gold);
+    color: var(--ink);
+    font-size: .6rem; font-weight: 700;
+    letter-spacing: .1em;
+    padding: 3px 10px;
+    text-transform: uppercase;
+  }
+  .jc-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--cream);
+    line-height: 1.4;
+    margin-top: .8rem;
+    margin-bottom: .5rem;
+  }
+  .jc-meta {
+    font-size: .65rem; font-weight: 500;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .jc-votes {
+    display: flex; align-items: center; gap: 6px; margin-top: .8rem;
+  }
+  .vote-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .vote-dot.empty { background: transparent; border: 1px solid rgba(184,134,11,.4); }
+  .jc-vote-count { font-size: .7rem; color: rgba(245,240,232,.5); margin-left: 4px; }
+
+  /* ════════════════════════════
+     MARQUEE TICKER
+  ════════════════════════════ */
+  .ticker {
+    background: var(--navy);
+    padding: .7rem 0;
+    overflow: hidden;
+    position: relative;
+    border-top: 1px solid rgba(184,134,11,.3);
+    border-bottom: 1px solid rgba(184,134,11,.3);
+  }
+  .ticker-track {
+    display: flex; gap: 3rem;
+    white-space: nowrap;
+    animation: ticker-scroll 30s linear infinite;
+  }
+  .ticker-item {
+    display: flex; align-items: center; gap: .8rem;
+    font-size: .7rem; font-weight: 500;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: rgba(245,240,232,.7);
+    flex-shrink: 0;
+  }
+  .ticker-diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); }
+
+  @keyframes ticker-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ════════════════════════════
+     ABOUT / MISSION
+  ════════════════════════════ */
+  #about {
+    padding: 100px 8vw;
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 8vw;
+    align-items: start;
+    background: var(--cream);
+    position: relative;
+  }
+  #about::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--navy), var(--gold), var(--navy));
+  }
+
+  .about-left {
+    position: sticky; top: 100px;
+  }
+  .section-label {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 1.2rem;
+  }
+  .section-label-line { width: 30px; height: 1px; background: var(--gold); }
+  .section-label-text {
+    font-size: .65rem; font-weight: 600;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .section-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+  .section-heading em { font-style: italic; color: var(--navy); }
+
+  .mission-box {
+    background: var(--navy);
+    padding: 1.8rem;
+    position: relative;
+    margin-top: 2rem;
+  }
+  .mission-box::before {
+    content: '\201C';
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    color: var(--gold);
+    opacity: .3;
+    position: absolute;
+    top: -.5rem; left: 1.2rem;
+    line-height: 1;
+  }
+  .mission-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.75;
+    color: var(--cream);
+  }
+
+  .values-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: .5rem;
+  }
+  .value-card {
+    background: var(--white);
+    padding: 1.6rem;
+    transition: background .25s;
+  }
+  .value-card:hover { background: var(--cream-dark); }
+  .value-icon { font-size: 1.6rem; margin-bottom: .8rem; }
+  .value-name {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: .4rem;
+  }
+  .value-desc {
+    font-size: .78rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .about-right { padding-top: .5rem; }
+  .about-intro {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--ink-mid);
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .founders-section { margin-bottom: 2.5rem; }
+  .founders-label {
+    font-size: .65rem; font-weight: 600;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.2rem;
+  }
+  .founder-list { display: flex; flex-direction: column; gap: .8rem; }
+  .founder-item {
+    display: flex; align-items: center; gap: 1.2rem;
+    padding: 1rem 1.2rem;
+    background: var(--white);
+    border-left: 3px solid transparent;
+    transition: border-color .2s, transform .2s;
+  }
+  .founder-item:hover { border-color: var(--gold); transform: translateX(4px); }
+  .founder-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: .9rem; font-weight: 700;
+    color: var(--gold-light);
+    flex-shrink: 0;
+  }
+  .founder-name {
+    font-weight: 600; font-size: .88rem;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .founder-research {
+    font-size: .75rem; color: var(--ink-soft);
+  }
+  .founder-uni {
+    margin-left: auto;
+    font-size: .62rem; font-weight: 500;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--navy); opacity: .6;
+    text-align: right;
+  }
+
+  /* ════════════════════════════
+     HOW IT WORKS
+  ════════════════════════════ */
+  #how {
+    padding: 100px 8vw;
+    background: var(--ink);
+    position: relative; overflow: hidden;
+  }
+  .how-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(184,134,11,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(184,134,11,.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .how-header {
+    text-align: center; margin-bottom: 5rem; position: relative; z-index: 1;
+  }
+  .how-header .section-label { justify-content: center; }
+  .how-header .section-heading { color: var(--cream); }
+  .how-header .section-heading em { color: var(--gold-light); }
+  .how-header p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem; font-weight: 300;
+    color: rgba(245,240,232,.6);
+    max-width: 540px; margin: 1rem auto 0;
+  }
+
+  .steps-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(184,134,11,.15);
+    position: relative; z-index: 1;
+  }
+  .step-card {
+    background: rgba(14,17,23,.9);
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: background .3s;
+    cursor: default;
+  }
+  .step-card:hover { background: rgba(27,58,107,.4); }
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 800;
+    color: rgba(184,134,11,.12);
+    line-height: 1;
+    position: absolute; top: 1.5rem; right: 1.5rem;
+  }
+  .step-icon-ring {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 1px solid rgba(184,134,11,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    transition: border-color .3s, background .3s;
+  }
+  .step-card:hover .step-icon-ring { border-color: var(--gold); background: rgba(184,134,11,.1); }
+  .step-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cream);
+    margin-bottom: .7rem;
+  }
+  .step-desc {
+    font-size: .8rem;
+    line-height: 1.7;
+    color: rgba(245,240,232,.55);
+  }
+  .step-connector {
+    position: absolute; top: 50%; right: -1px;
+    width: 2px; height: 40px;
+    background: linear-gradient(var(--gold), transparent);
+    transform: translateY(-50%);
+  }
+
+  /* ════════════════════════════
+     MONTHLY VOTE SECTION
+  ════════════════════════════ */
+  #vote {
+    padding: 100px 8vw;
+    background: var(--cream);
+    position: relative;
+  }
+  .vote-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6vw;
+    align-items: start;
+  }
+  .vote-header-col .section-heading { margin-bottom: 1rem; }
+  .vote-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem; font-weight: 300;
+    line-height: 1.75;
+    color: var(--ink-soft);
+    margin-bottom: 2rem;
+  }
+  .vote-timeline {
+    display: flex; flex-direction: column; gap: 0;
+    margin-top: 2rem;
+  }
+  .vt-item {
+    display: flex; gap: 1.2rem; align-items: flex-start;
+    padding-bottom: 1.5rem;
+    position: relative;
+  }
+  .vt-item::before {
+    content: '';
+    position: absolute; top: 28px; left: 14px;
+    width: 1px; height: calc(100% - 16px);
+    background: var(--rule);
+  }
+  .vt-item:last-child::before { display: none; }
+  .vt-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--gold);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; font-weight: 700; color: var(--gold);
+    flex-shrink: 0; z-index: 1;
+  }
+  .vt-content {}
+  .vt-week { font-size: .62rem; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
+  .vt-action { font-size: .88rem; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+  .vt-sub { font-size: .75rem; color: var(--ink-soft); }
+
+  .vote-panel {
+    background: var(--ink);
+    padding: 2.5rem;
+  }
+  .vote-panel-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: .5rem;
+  }
+  .vote-panel-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--cream);
+  }
+  .vote-badge {
+    background: var(--rust);
+    color: var(--white);
+    font-size: .6rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 3px 10px;
+  }
+  .vote-subtitle { font-size: .72rem; color: rgba(245,240,232,.4); margin-bottom: 2rem; font-style: italic; }
+
+  .candidate-list { display: flex; flex-direction: column; gap: .8rem; margin-bottom: 2rem; }
+  .candidate {
+    background: rgba(255,253,248,.04);
+    border: 1px solid rgba(184,134,11,.15);
+    padding: 1.1rem 1.2rem;
+    cursor: pointer;
+    transition: border-color .25s, background .25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .candidate:hover, .candidate.selected {
+    border-color: var(--gold);
+    background: rgba(184,134,11,.08);
+  }
+  .candidate-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: rgba(184,134,11,.06);
+    transition: width .6s ease;
+  }
+  .candidate-inner { position: relative; z-index: 1; }
+  .candidate-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .3rem; }
+  .candidate-title { font-size: .85rem; font-weight: 500; color: var(--cream); line-height: 1.35; flex: 1; margin-right: 1rem; }
+  .candidate-pct { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold-light); }
+  .candidate-journal { font-size: .65rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); opacity: .7; }
+  .candidate-bar { height: 2px; background: rgba(184,134,11,.15); margin-top: .7rem; border-radius: 1px; overflow: hidden; }
+  .candidate-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 1px; transition: width .8s ease; }
+
+  .vote-btn {
+    width: 100%;
+    background: var(--gold);
+    color: var(--ink);
+    border: none; cursor: pointer;
+    padding: 1rem;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: .78rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase;
+    transition: background .25s, transform .2s;
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  }
+  .vote-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .vote-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .vote-info { font-size: .68rem; color: rgba(245,240,232,.3); text-align: center; margin-top: .8rem; font-style: italic; }
+
+  /* ════════════════════════════
+     EVENTS
+  ════════════════════════════ */
+  #events {
+    padding: 100px 8vw;
+    background: var(--white);
+  }
+  .events-header { margin-bottom: 4rem; }
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-bottom: 3rem;
+  }
+  .event-card {
+    background: var(--white);
+    padding: 2.4rem;
+    position: relative; overflow: hidden;
+    transition: transform .3s;
+    cursor: default;
+  }
+  .event-card:hover { transform: translateY(-4px); z-index: 1; box-shadow: 0 12px 40px rgba(0,0,0,.1); }
+  .event-card.featured {
+    background: var(--navy);
+    grid-column: span 2;
+  }
+  .event-type-badge {
+    display: inline-block;
+    font-size: .6rem; font-weight: 600;
+    letter-spacing: .15em; text-transform: uppercase;
+    padding: 4px 12px;
+    margin-bottom: 1.5rem;
+  }
+  .badge-monthly { background: var(--gold-pale); color: var(--gold); }
+  .badge-annual  { background: var(--navy); color: var(--gold); }
+  .badge-podcast { background: rgba(92,122,95,.15); color: var(--sage); }
+  .event-card.featured .badge-annual { background: rgba(184,134,11,.2); }
+
+  .event-date {
+    display: flex; align-items: baseline; gap: .4rem; margin-bottom: .7rem;
+  }
+  .event-day {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem; font-weight: 800;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .event-month-year {
+    font-size: .7rem; font-weight: 500;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-soft);
+    line-height: 1;
+  }
+  .event-card.featured .event-month-year { color: rgba(245,240,232,.5); }
+
+  .event-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 600;
+    color: var(--ink); line-height: 1.3;
+    margin-bottom: .6rem;
+  }
+  .event-card.featured .event-title { font-size: 1.6rem; color: var(--cream); }
+  .event-desc {
+    font-size: .8rem; line-height: 1.65;
+    color: var(--ink-soft);
+    margin-bottom: 1.5rem;
+  }
+  .event-card.featured .event-desc { color: rgba(245,240,232,.6); }
+
+  .event-meta { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .event-tag {
+    font-size: .62rem; font-weight: 500;
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: 3px 10px;
+    background: var(--cream);
+    color: var(--ink-soft);
+    border: 1px solid var(--rule);
+  }
+  .event-card.featured .event-tag { background: rgba(255,253,248,.08); color: rgba(245,240,232,.6); border-color: rgba(184,134,11,.2); }
+
+  .event-register-btn {
+    display: inline-block; margin-top: 1.5rem;
+    font-size: .72rem; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--gold-light);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(184,134,11,.3);
+    padding-bottom: 2px;
+    transition: color .2s, border-color .2s;
+    cursor: pointer;
+    background: none; border-left: none; border-right: none; border-top: none;
+  }
+  .event-register-btn:hover { color: var(--gold-light); border-color: var(--gold-light); }
+
+  /* ════════════════════════════
+     SESSION FORMAT
+  ════════════════════════════ */
+  #session {
+    padding: 100px 8vw;
+    background: var(--cream);
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 8vw;
+    align-items: start;
+  }
+  .session-left { position: sticky; top: 100px; }
+  .session-clock {
+    margin-top: 2.5rem;
+    position: relative;
+    width: 200px; height: 200px;
+  }
+  .clock-ring {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--rule);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .clock-center {
+    text-align: center;
+  }
+  .clock-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem; font-weight: 800;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .clock-unit {
+    font-size: .65rem; font-weight: 600;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .session-agenda { display: flex; flex-direction: column; gap: 0; }
+  .agenda-item {
+    display: flex; gap: 1.5rem; align-items: flex-start;
+    padding: 1.4rem 0;
+    border-bottom: 1px solid var(--rule);
+    transition: background .2s;
+    position: relative;
+  }
+  .agenda-item:first-child { padding-top: 0; }
+  .agenda-time {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: .7rem; font-weight: 600;
+    letter-spacing: .05em; color: var(--gold);
+    width: 64px; flex-shrink: 0; padding-top: 2px;
+  }
+  .agenda-content {}
+  .agenda-title { font-size: .9rem; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+  .agenda-desc { font-size: .77rem; color: var(--ink-soft); line-height: 1.6; }
+  .agenda-duration {
+    margin-left: auto;
+    font-size: .6rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--navy); opacity: .5;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  /* ════════════════════════════
+     READING FRAMEWORK
+  ════════════════════════════ */
+  #framework {
+    padding: 100px 8vw;
+    background: var(--ink);
+    position: relative; overflow: hidden;
+  }
+  .framework-header { text-align: center; margin-bottom: 4rem; position: relative; z-index: 1; }
+  .framework-header .section-heading { color: var(--cream); }
+  .framework-header p { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 300; color: rgba(245,240,232,.5); margin-top: .8rem; }
+
+  .framework-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(184,134,11,.15);
+    position: relative; z-index: 1;
+  }
+  .fw-card {
+    background: rgba(14,17,23,.9);
+    padding: 1.8rem 1.6rem;
+    transition: background .3s;
+    cursor: default;
+  }
+  .fw-card:hover { background: rgba(27,58,107,.35); }
+  .fw-num {
+    font-family: 'Playfair Display', serif;
+    font-size: .7rem; font-weight: 700;
+    color: var(--gold); letter-spacing: .1em;
+    margin-bottom: .7rem;
+  }
+  .fw-dimension {
+    font-size: .88rem; font-weight: 600;
+    color: var(--cream); margin-bottom: .5rem;
+  }
+  .fw-question {
+    font-size: .75rem; line-height: 1.65;
+    color: rgba(245,240,232,.45);
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: .9rem;
+  }
+  .fw-card.highlight { background: rgba(184,134,11,.12); }
+  .fw-card.highlight .fw-dimension { color: var(--gold-light); }
+
+  /* ════════════════════════════
+     CHANNELS
+  ════════════════════════════ */
+  #channels {
+    padding: 100px 8vw;
+    background: var(--cream);
+  }
+  .channels-header { margin-bottom: 4rem; }
+  .channels-flex {
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .channel-row {
+    display: grid;
+    grid-template-columns: 60px 200px 1fr auto;
+    align-items: center; gap: 2rem;
+    padding: 1.4rem 2rem;
+    background: var(--white);
+    border-left: 4px solid transparent;
+    transition: border-color .25s, transform .2s, box-shadow .2s;
+    cursor: default;
+  }
+  .channel-row:hover {
+    border-color: var(--gold);
+    transform: translateX(6px);
+    box-shadow: 0 4px 20px rgba(0,0,0,.06);
+  }
+  .channel-icon { font-size: 1.8rem; text-align: center; }
+  .channel-name { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; color: var(--ink); }
+  .channel-purpose { font-size: .75rem; color: var(--ink-soft); margin-top: 2px; }
+  .channel-desc { font-size: .8rem; line-height: 1.65; color: var(--ink-soft); }
+  .channel-freq {
+    font-size: .62rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--gold); white-space: nowrap;
+    padding: 4px 12px;
+    border: 1px solid var(--rule);
+    background: var(--cream);
+  }
+
+  /* ════════════════════════════
+     ANNUAL SYMPOSIUM
+  ════════════════════════════ */
+  #symposium {
+    padding: 100px 8vw;
+    background: var(--ink);
+    position: relative; overflow: hidden;
+  }
+  .symp-inner { position: relative; z-index: 1; }
+  .symp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6vw; align-items: start; }
+  .symp-left .section-heading { color: var(--cream); }
+  .symp-left .section-heading em { color: var(--gold-light); }
+  .symp-left p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem; font-weight: 300; line-height: 1.75;
+    color: rgba(245,240,232,.6); margin-bottom: 2.5rem;
+  }
+  .symp-details {
+    display: flex; flex-direction: column; gap: .8rem;
+    margin-bottom: 2.5rem;
+  }
+  .symp-detail {
+    display: flex; gap: 1rem; align-items: flex-start;
+  }
+  .symp-detail-icon { font-size: 1rem; width: 20px; flex-shrink: 0; margin-top: 2px; }
+  .symp-detail-content {}
+  .symp-detail-label { font-size: .62rem; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin-bottom: 1px; }
+  .symp-detail-val { font-size: .85rem; color: rgba(245,240,232,.75); }
+
+  .symp-right {}
+  .symp-programme {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .prog-item {
+    display: flex; gap: 1.4rem; align-items: flex-start;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid rgba(184,134,11,.12);
+  }
+  .prog-time {
+    font-size: .65rem; font-weight: 600;
+    letter-spacing: .05em; color: var(--gold);
+    width: 80px; flex-shrink: 0;
+    padding-top: 3px;
+  }
+  .prog-activity { font-size: .85rem; color: rgba(245,240,232,.75); line-height: 1.5; }
+  .prog-activity strong { color: var(--cream); font-weight: 600; }
+
+  /* ════════════════════════════
+     JOIN / CTA
+  ════════════════════════════ */
+  #join {
+    padding: 100px 8vw;
+    background: var(--cream);
+    text-align: center;
+  }
+  .join-inner { max-width: 700px; margin: 0 auto; }
+  .join-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.5rem, 4.5vw, 4.2rem);
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+  .join-heading em { font-style: italic; color: var(--navy); }
+  .join-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem; font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    margin-bottom: 3rem;
+  }
+  .join-form {
+    display: flex; gap: .8rem; max-width: 500px; margin: 0 auto 1.5rem;
+  }
+  .join-input {
+    flex: 1;
+    padding: .9rem 1.2rem;
+    border: 1px solid rgba(184,134,11,.35);
+    background: var(--white);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: .88rem; color: var(--ink);
+    outline: none;
+    transition: border-color .2s;
+  }
+  .join-input:focus { border-color: var(--gold); }
+  .join-input::placeholder { color: rgba(74,77,90,.45); }
+
+  .join-channels {
+    display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--rule);
+  }
+  .join-channel {
+    display: flex; align-items: center; gap: .6rem;
+    font-size: .75rem; font-weight: 500;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color .2s;
+    cursor: pointer;
+    background: none; border: none; padding: 0;
+  }
+  .join-channel:hover { color: var(--navy); }
+  .join-channel-icon { font-size: 1.2rem; }
+
+  /* ════════════════════════════
+     FOOTER
+  ════════════════════════════ */
+  footer {
+    background: var(--ink);
+    padding: 3rem 8vw;
+    border-top: 1px solid rgba(184,134,11,.15);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .footer-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem; color: var(--cream);
+  }
+  .footer-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: .9rem; font-style: italic;
+    color: rgba(245,240,232,.4);
+    margin-top: 2px;
+  }
+  .footer-links { display: flex; gap: 2rem; }
+  .footer-links a {
+    font-size: .7rem; font-weight: 500;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(245,240,232,.4);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+  .footer-copy {
+    font-size: .68rem;
+    color: rgba(245,240,232,.25);
+  }
+
+  /* ════════════════════════════
+     ANIMATIONS
+  ════════════════════════════ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ════════════════════════════
+     RESPONSIVE
+  ════════════════════════════ */
+  @media (max-width: 1024px) {
+    #hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    #about, #session, .symp-grid { grid-template-columns: 1fr; }
+    .about-left { position: static; }
+    .session-left { position: static; }
+    .steps-row { grid-template-columns: repeat(2, 1fr); }
+    .framework-grid { grid-template-columns: repeat(2, 1fr); }
+    .vote-layout { grid-template-columns: 1fr; }
+    .events-grid { grid-template-columns: 1fr; }
+    .event-card.featured { grid-column: span 1; }
+    .channel-row { grid-template-columns: 48px 1fr; }
+    .channel-freq { display: none; }
+    .channel-desc { grid-column: span 2; font-size: .75rem; }
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+  }
+  @media (max-width: 640px) {
+    .steps-row, .framework-grid { grid-template-columns: 1fr; }
+    .hero-left { padding: 100px 6vw 60px; }
+    #about, #how, #vote, #events, #session, #framework, #channels, #symposium, #join { padding: 70px 6vw; }
+    footer { flex-direction: column; text-align: center; }
+    .join-form { flex-direction: column; }
+  }
+
+  /* MOBILE MENU */
+  .mobile-menu {
+    display: none;
+    position: fixed; top: 64px; left: 0; right: 0;
+    background: var(--ink);
+    padding: 1.5rem 5vw;
+    border-bottom: 1px solid rgba(184,134,11,.2);
+    z-index: 99;
+    flex-direction: column; gap: .3rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    display: block; padding: .8rem;
+    text-decoration: none;
+    font-size: .88rem; font-weight: 500;
+    color: rgba(245,240,232,.7);
+    border-bottom: 1px solid rgba(184,134,11,.1);
+    letter-spacing: .05em;
+    transition: color .2s;
+  }
+  .mobile-menu a:hover { color: var(--gold); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+    background: var(--navy);
+    color: var(--cream);
+    padding: 1rem 1.5rem;
+    font-size: .82rem;
+    border-left: 3px solid var(--gold);
+    box-shadow: 0 8px 32px rgba(0,0,0,.2);
+    transform: translateX(120%);
+    transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+    max-width: 300px;
+  }
+  .toast.show { transform: translateX(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="#hero" class="nav-brand">
+    <span class="nav-brand-text">Scholarly Roots</span>
+    <span class="nav-brand-sub">Journal Reading Community</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#vote">Monthly Vote</a></li>
+    <li><a href="#events">Events</a></li>
+    <li><a href="#session">Sessions</a></li>
+    <li><a href="#symposium">Symposium</a></li>
+    <li><a href="#join" class="nav-cta">Join Now</a></li>
+  </ul>
+  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#about" onclick="toggleMenu()">About</a>
+  <a href="#how" onclick="toggleMenu()">How It Works</a>
+  <a href="#vote" onclick="toggleMenu()">Monthly Vote</a>
+  <a href="#events" onclick="toggleMenu()">Events</a>
+  <a href="#session" onclick="toggleMenu()">Sessions</a>
+  <a href="#symposium" onclick="toggleMenu()">Symposium</a>
+  <a href="#join" onclick="toggleMenu()">Join Now</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+
+    <h1 class="hero-title">
+      Read Deeply.<br><em>Think Critically.</em><br>Lead Boldly.
+    </h1>
+    <p class="hero-desc">
+      A research community dedicated to rigorous journal reading in business and management. Because in the age of AI, those who actually read will lead.
+    </p>
+    <div class="hero-btns">
+      <a href="#join" class="btn-primary">
+        <span>Join the Community</span>
+        <span>→</span>
+      </a>
+      <a href="#vote" class="btn-outline">
+        <span>Vote This Month</span>
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">12</div>
+        <div class="hero-stat-label">Sessions / Year</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">3</div>
+        <div class="hero-stat-label">Journals / Month</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">1</div>
+        <div class="hero-stat-label">Annual Symposium</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">UK</div>
+        <div class="hero-stat-label">Wide & Growing</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-bg-art"></div>
+    <div class="hero-grid-lines"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-card-stack">
+      <div class="journal-card">
+        <div class="jc-rank">🥇 Top Vote</div>
+        <div class="jc-title">"AI-Enabled Decision Making in Supply Chain Networks: A Systematic Review"</div>
+        <div class="jc-meta">J. of Operations Management · ABS 4★</div>
+        <div class="jc-votes">
+          <div class="vote-dot"></div><div class="vote-dot"></div><div class="vote-dot"></div>
+          <div class="vote-dot"></div><div class="vote-dot empty"></div>
+          <span class="jc-vote-count">42 votes</span>
+        </div>
+      </div>
+      <div class="journal-card">
+        <div class="jc-rank">🥈 Runner Up</div>
+        <div class="jc-title">"Algorithmic Management and Worker Autonomy in Gig Platforms"</div>
+        <div class="jc-meta">Work, Employment & Society · ABS 3</div>
+        <div class="jc-votes">
+          <div class="vote-dot"></div><div class="vote-dot"></div><div class="vote-dot"></div>
+          <div class="vote-dot empty"></div><div class="vote-dot empty"></div>
+          <span class="jc-vote-count">31 votes</span>
+        </div>
+      </div>
+      <div class="journal-card">
+        <div class="jc-rank">🥉 Third Place</div>
+        <div class="jc-title">"Transformational Leadership in Hybrid Work Environments"</div>
+        <div class="jc-meta">Leadership Quarterly · ABS 4★</div>
+        <div class="jc-votes">
+          <div class="vote-dot"></div><div class="vote-dot"></div>
+          <div class="vote-dot empty"></div><div class="vote-dot empty"></div><div class="vote-dot empty"></div>
+          <span class="jc-vote-count">18 votes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track" id="ticker-track">
+    <span class="ticker-item"><span class="ticker-diamond"></span>Journal of Operations Management</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Leadership Quarterly</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>MIS Quarterly</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Academy of Management Journal</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>British Journal of Management</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Supply Chain Management</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Journal of Management Studies</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Human Relations</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Organization Studies</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>AI & Society</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="ticker-item"><span class="ticker-diamond"></span>Journal of Operations Management</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Leadership Quarterly</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>MIS Quarterly</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Academy of Management Journal</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>British Journal of Management</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Supply Chain Management</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Journal of Management Studies</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Human Relations</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>Organization Studies</span>
+    <span class="ticker-item"><span class="ticker-diamond"></span>AI & Society</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-left reveal">
+    <div class="section-label"><span class="section-label-line"></span><span class="section-label-text">Who We Are</span></div>
+    <h2 class="section-heading">A community built on <em>intellectual rigour</em></h2>
+    <div class="mission-box">
+      <p class="mission-text">To cultivate a UK-wide community of doctoral researchers who engage rigorously with management literature — resisting intellectual shortcuts, championing deep reading, and generating critical dialogue that advances theory and practice.</p>
+    </div>
+  </div>
+  <div class="about-right">
+    <p class="about-intro reveal">
+      Three doctoral researchers at the University of Huddersfield — specialising in AI Supply Chain Analytics, Leadership, and Algorithmic Work — founded Scholarly Roots because they believe that in an era where AI summarises everything, the researchers who actually read will be the ones who discover what AI cannot.
+    </p>
+
+    <div class="founders-section reveal">
+      <p class="founders-label">Founding Researchers</p>
+      <div class="founder-list">
+        <div class="founder-item">
+          <div class="founder-avatar">TS</div>
+          <div>
+            <div class="founder-name">Tewogbade Shakir</div>
+            <div class="founder-research">Researcher, University of Huddersfield</div>
+          </div>
+          <div class="founder-uni">Huddersfield<br>PhD Candidate</div>
+        </div>
+        <div class="founder-item">
+          <div class="founder-avatar">DA</div>
+          <div>
+            <div class="founder-name">Dada Abigael</div>
+            <div class="founder-research">Researcher, University of Huddersfield</div>
+          </div>
+          <div class="founder-uni">Huddersfield<br>PhD Candidate</div>
+        </div>
+        <div class="founder-item">
+          <div class="founder-avatar">OA</div>
+          <div>
+            <div class="founder-name">Ogundipe Adetutu</div>
+            <div class="founder-research">Researcher, University of Huddersfield</div>
+          </div>
+          <div class="founder-uni">Huddersfield<br>PhD Candidate</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="values-grid reveal">
+      <div class="value-card">
+        <div class="value-icon">📖</div>
+        <div class="value-name">Deep Reading</div>
+        <div class="value-desc">We read full articles — not abstracts — and interrogate every section.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔍</div>
+        <div class="value-name">Critical Dialogue</div>
+        <div class="value-desc">We celebrate disagreement, gap-spotting, and rigorous intellectual challenge.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🌍</div>
+        <div class="value-name">Inclusivity</div>
+        <div class="value-desc">Open to all career stages — UG, PGT, PGR, ECRs, and practitioners.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⚡</div>
+        <div class="value-name">Knowledge Transfer</div>
+        <div class="value-desc">What we read must inform research, policy, and professional life.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="how-grid-bg"></div>
+  <div class="how-header reveal">
+    <div class="section-label" style="justify-content:center">
+      <span class="section-label-line"></span>
+      <span class="section-label-text">The Process</span>
+      <span class="section-label-line"></span>
+    </div>
+    <h2 class="section-heading">How <em>Scholarly Roots</em> works</h2>
+    <p>Each month follows a clear democratic process — from nomination to live discussion and beyond.</p>
+  </div>
+  <div class="steps-row reveal">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-icon-ring">📝</div>
+      <h3 class="step-name">Nominate</h3>
+      <p class="step-desc">Members nominate one article each via Google Form. Must include full citation, ABS ranking, and a 2-sentence rationale.</p>
+      <div class="step-connector"></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-icon-ring">🗳️</div>
+      <h3 class="step-name">Vote</h3>
+      <p class="step-desc">A curated shortlist of 5 goes to community vote via WhatsApp and LinkedIn polls. Top 3 articles are selected.</p>
+      <div class="step-connector"></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-icon-ring">🎙️</div>
+      <h3 class="step-name">Listen</h3>
+      <p class="step-desc">A podcast episode drops mid-month: 20 minutes covering aims, methodology, findings, gaps, and policy implications.</p>
+      <div class="step-connector"></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-icon-ring">💬</div>
+      <h3 class="step-name">Debate</h3>
+      <p class="step-desc">Last Thursday of the month: a 90-minute live virtual session. Reviewers present. Community debates. Gaps are mapped.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VOTE -->
+<section id="vote">
+  <div class="vote-layout">
+    <div class="vote-header-col reveal">
+      <div class="section-label"><span class="section-label-line"></span><span class="section-label-text">Monthly Vote</span></div>
+      <h2 class="section-heading">This month's <em>reading candidates</em></h2>
+      <p class="vote-desc">Every month, the community nominates and votes on the articles we read together. Democracy drives the reading list.</p>
+
+      <div class="vote-timeline">
+        <div class="vt-item">
+          <div class="vt-dot">1</div>
+          <div class="vt-content">
+            <div class="vt-week">Week 1</div>
+            <div class="vt-action">Nomination window opens</div>
+            <div class="vt-sub">Submit via Google Form — full citation required</div>
+          </div>
+        </div>
+        <div class="vt-item">
+          <div class="vt-dot">2</div>
+          <div class="vt-content">
+            <div class="vt-week">Week 2</div>
+            <div class="vt-action">Shortlist & community vote</div>
+            <div class="vt-sub">Top 5 curated → WhatsApp + LinkedIn poll (5 days)</div>
+          </div>
+        </div>
+        <div class="vt-item">
+          <div class="vt-dot">3</div>
+          <div class="vt-content">
+            <div class="vt-week">Week 2–3</div>
+            <div class="vt-action">Winners announced + podcast drops</div>
+            <div class="vt-sub">Top 3 revealed · Reading framework sent to all members</div>
+          </div>
+        </div>
+        <div class="vt-item">
+          <div class="vt-dot">4</div>
+          <div class="vt-content">
+            <div class="vt-week">Last Thursday</div>
+            <div class="vt-action">Live reading session</div>
+            <div class="vt-sub">90-min virtual session · 6:00 PM GMT</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="vote-panel">
+        <div class="vote-panel-header">
+          <h3 class="vote-panel-title">Current Month — Live Vote</h3>
+          <span class="vote-badge">Voting Open</span>
+        </div>
+        <p class="vote-subtitle">Select your preferred article · One vote per member</p>
+
+        <div class="candidate-list" id="candidates">
+          <div class="candidate" onclick="selectCandidate(0)" data-votes="42">
+            <div class="candidate-fill" style="width:54%"></div>
+            <div class="candidate-inner">
+              <div class="candidate-header">
+                <span class="candidate-title">AI-Enabled Decision Making in Supply Chain Networks: A Systematic Review</span>
+                <span class="candidate-pct">54%</span>
+              </div>
+              <div class="candidate-journal">J. of Operations Management · ABS 4★ · 2024</div>
+              <div class="candidate-bar"><div class="candidate-bar-fill" style="width:54%"></div></div>
+            </div>
+          </div>
+          <div class="candidate" onclick="selectCandidate(1)" data-votes="31">
+            <div class="candidate-fill" style="width:32%"></div>
+            <div class="candidate-inner">
+              <div class="candidate-header">
+                <span class="candidate-title">Algorithmic Management and Worker Autonomy in Gig Economy Platforms</span>
+                <span class="candidate-pct">32%</span>
+              </div>
+              <div class="candidate-journal">Work, Employment & Society · ABS 3 · 2023</div>
+              <div class="candidate-bar"><div class="candidate-bar-fill" style="width:32%"></div></div>
+            </div>
+          </div>
+          <div class="candidate" onclick="selectCandidate(2)" data-votes="18">
+            <div class="candidate-fill" style="width:14%"></div>
+            <div class="candidate-inner">
+              <div class="candidate-header">
+                <span class="candidate-title">Transformational Leadership and Team Performance in Hybrid Work Settings</span>
+                <span class="candidate-pct">14%</span>
+              </div>
+              <div class="candidate-journal">Leadership Quarterly · ABS 4★ · 2024</div>
+              <div class="candidate-bar"><div class="candidate-bar-fill" style="width:14%"></div></div>
+            </div>
+          </div>
+          <div class="candidate" onclick="selectCandidate(3)" data-votes="0">
+            <div class="candidate-fill" style="width:0%"></div>
+            <div class="candidate-inner">
+              <div class="candidate-header">
+                <span class="candidate-title">Resilience Strategies in Post-COVID Global Supply Chains: Evidence from UK Firms</span>
+                <span class="candidate-pct">0%</span>
+              </div>
+              <div class="candidate-journal">Supply Chain Management Int'l · ABS 3 · 2024</div>
+              <div class="candidate-bar"><div class="candidate-bar-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div class="candidate" onclick="selectCandidate(4)" data-votes="0">
+            <div class="candidate-fill" style="width:0%"></div>
+            <div class="candidate-inner">
+              <div class="candidate-header">
+                <span class="candidate-title">Human–AI Collaboration in Knowledge Work: A Mixed-Methods Investigation</span>
+                <span class="candidate-pct">0%</span>
+              </div>
+              <div class="candidate-journal">MIS Quarterly · ABS 4★ · 2025</div>
+              <div class="candidate-bar"><div class="candidate-bar-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <button class="vote-btn" id="vote-btn" onclick="castVote()" disabled>
+          Select an Article to Vote
+        </button>
+        <p class="vote-info">78 members have voted · Closes in 3 days</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EVENTS -->
+<section id="events">
+  <div class="events-header reveal">
+    <div class="section-label"><span class="section-label-line"></span><span class="section-label-text">Events</span></div>
+    <h2 class="section-heading">Where we <em>come alive</em></h2>
+  </div>
+
+  <div class="events-grid reveal">
+    <div class="event-card featured">
+      <span class="event-type-badge badge-annual">Annual Flagship</span>
+      <div class="event-date">
+        <span class="event-day">14</span>
+        <div>
+          <div class="event-month-year">June</div>
+          <div class="event-month-year">2026</div>
+        </div>
+      </div>
+      <h3 class="event-title">The Scholarly Roots Annual Symposium</h3>
+      <p class="event-desc">A full-day hybrid academic symposium at the University of Huddersfield featuring 2–3 invited professors, doctoral showcase presentations, a collaborative gap-mapping workshop, and annual awards. Free for students.</p>
+      <div class="event-meta">
+        <span class="event-tag">Hybrid · In-Person + Virtual</span>
+        <span class="event-tag">9:00 AM – 5:00 PM</span>
+        <span class="event-tag">UoH Business School</span>
+        <span class="event-tag">Free for Students</span>
+      </div>
+      <button class="event-register-btn" onclick="showToast('Annual Symposium registration opens in April 2026!')">Register Interest →</button>
+    </div>
+    <div class="event-card">
+      <span class="event-type-badge badge-monthly">Monthly Session</span>
+      <div class="event-date">
+        <span class="event-day">30</span>
+        <div>
+          <div class="event-month-year">Jan</div>
+          <div class="event-month-year" style="color:var(--gold)">2026</div>
+        </div>
+      </div>
+      <h3 class="event-title">January Reading Session</h3>
+      <p class="event-desc">90-minute virtual session. Reviewer presentations, live critical discussion, and research gap spotlight. All welcome.</p>
+      <div class="event-meta">
+        <span class="event-tag">Virtual · Teams</span>
+        <span class="event-tag">6:00 PM GMT</span>
+        <span class="event-tag">Free</span>
+      </div>
+      <button class="event-register-btn" onclick="showToast('You\'ve been registered for the January session!')">Register Free →</button>
+    </div>
+    <div class="event-card">
+      <span class="event-type-badge badge-podcast">Podcast</span>
+      <div class="event-date">
+        <span class="event-day">15</span>
+        <div>
+          <div class="event-month-year">Jan</div>
+          <div class="event-month-year" style="color:var(--sage)">2026</div>
+        </div>
+      </div>
+      <h3 class="event-title">The Reading Room — Ep. 1</h3>
+      <p class="event-desc">Monthly podcast deep-dive. 20 minutes covering aims, methodology, findings, gaps, and policy implications of the voted article.</p>
+      <div class="event-meta">
+        <span class="event-tag">Spotify</span>
+        <span class="event-tag">Apple Podcasts</span>
+        <span class="event-tag">~20 mins</span>
+      </div>
+      <button class="event-register-btn" onclick="showToast('Podcast drops on the 15th of every month — subscribe on Spotify!')">Listen on Spotify →</button>
+    </div>
+    <div class="event-card">
+      <span class="event-type-badge badge-monthly">Monthly Session</span>
+      <div class="event-date">
+        <span class="event-day">27</span>
+        <div>
+          <div class="event-month-year">Feb</div>
+          <div class="event-month-year" style="color:var(--gold)">2026</div>
+        </div>
+      </div>
+      <h3 class="event-title">February Reading Session</h3>
+      <p class="event-desc">This month's voted article takes centre stage. Full 13-dimension framework discussion with live Mentimeter polls.</p>
+      <div class="event-meta">
+        <span class="event-tag">Virtual · Teams</span>
+        <span class="event-tag">6:00 PM GMT</span>
+        <span class="event-tag">Free</span>
+      </div>
+      <button class="event-register-btn" onclick="showToast('Registration for Feb session opens after January\'s session!')">Register Free →</button>
+    </div>
+  </div>
+</section>
+
+<!-- SESSION FORMAT -->
+<section id="session">
+  <div class="session-left reveal">
+    <div class="section-label"><span class="section-label-line"></span><span class="section-label-text">Session Format</span></div>
+    <h2 class="section-heading">90 minutes of <em>pure intellectual engagement</em></h2>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;line-height:1.75;color:var(--ink-soft);margin-top:1rem;">Not a seminar. Not a lecture. A structured, energetic debate where every voice matters and every gap spotted is a potential PhD contribution.</p>
+    <div class="session-clock">
+      <div class="clock-ring">
+        <div class="clock-center">
+          <div class="clock-num">90</div>
+          <div class="clock-unit">Minutes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="reveal">
+    <div class="session-agenda">
+      <div class="agenda-item">
+        <span class="agenda-time">00:00</span>
+        <div class="agenda-content">
+          <div class="agenda-title">Welcome & Article Introduction</div>
+          <div class="agenda-desc">Facilitator opens, introduces the article and authors. Brief housekeeping.</div>
+        </div>
+        <span class="agenda-duration">5 min</span>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-time">00:05</span>
+        <div class="agenda-content">
+          <div class="agenda-title">Warm-Up Round</div>
+          <div class="agenda-desc">Each attendee shares in one sentence: what they found most surprising in the article.</div>
+        </div>
+        <span class="agenda-duration">10 min</span>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-time">00:15</span>
+        <div class="agenda-content">
+          <div class="agenda-title">Reviewer Presentation A</div>
+          <div class="agenda-desc">Aims, objectives, theoretical framework, and methodology. Volunteer reviewer presents using the Scholarly Roots framework.</div>
+        </div>
+        <span class="agenda-duration">15 min</span>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-time">00:30</span>
+        <div class="agenda-content">
+          <div class="agenda-title">Reviewer Presentation B</div>
+          <div class="agenda-desc">Key findings, theoretical and practical contributions, policy implications.</div>
+        </div>
+        <span class="agenda-duration">15 min</span>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-time">00:45</span>
+        <div class="agenda-content">
+          <div class="agenda-title">Open Critical Discussion</div>
+          <div class="agenda-desc">Strengths, weaknesses, research gaps. Live Padlet board. Facilitator keeps debate flowing. Disagreement welcomed.</div>
+        </div>
+        <span class="agenda-duration">25 min</span>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-time">01:10</span>
+        <div class="agenda-content">
+          <div class="agenda-title">Rate the Paper — Live Poll</div>
+          <div class="agenda-desc">Live Mentimeter poll: score 1–10. Community verdict: Extend, Replicate, or Reject?</div>
+        </div>
+        <span class="agenda-duration">10 min</span>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-time">01:20</span>
+        <div class="agenda-content">
+          <div class="agenda-title">Research Gap Spotlight</div>
+          <div class="agenda-desc">Members pitch one PhD-worthy gap they spotted. Lightning round — 30 seconds each.</div>
+        </div>
+        <span class="agenda-duration">8 min</span>
+      </div>
+      <div class="agenda-item">
+        <span class="agenda-time">01:28</span>
+        <div class="agenda-content">
+          <div class="agenda-title">Wrap-Up & Next Month Reveal</div>
+          <div class="agenda-desc">Next month's voted journal revealed. Best Question of the Night announced.</div>
+        </div>
+        <span class="agenda-duration">2 min</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- READING FRAMEWORK -->
+<section id="framework">
+  <div class="how-grid-bg"></div>
+  <div class="framework-header reveal">
+    <div class="section-label" style="justify-content:center">
+      <span class="section-label-line"></span>
+      <span class="section-label-text">Reading Framework</span>
+      <span class="section-label-line"></span>
+    </div>
+    <h2 class="section-heading">The <em>13-Dimension</em> Review Framework</h2>
+    <p>Every article reviewed through the same rigorous lens. Two volunteer reviewers prepare this before each session.</p>
+  </div>
+  <div class="framework-grid reveal">
+    <div class="fw-card">
+      <div class="fw-num">01</div>
+      <div class="fw-dimension">Bibliographic Details</div>
+      <div class="fw-question">Authors, year, journal, ABS ranking, DOI, citation count.</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">02</div>
+      <div class="fw-dimension">Aims & Objectives</div>
+      <div class="fw-question">What does the paper set out to do? Are the aims clearly stated and achieved?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">03</div>
+      <div class="fw-dimension">Research Questions</div>
+      <div class="fw-question">What questions/hypotheses are addressed? Are they novel and well-grounded?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">04</div>
+      <div class="fw-dimension">Theoretical Framework</div>
+      <div class="fw-question">Which theories/models are used? Is the theoretical grounding appropriate?</div>
+    </div>
+    <div class="fw-card highlight">
+      <div class="fw-num">05</div>
+      <div class="fw-dimension">Methodology</div>
+      <div class="fw-question">Research design, data collection, sample, analytical technique — all justified?</div>
+    </div>
+    <div class="fw-card highlight">
+      <div class="fw-num">06</div>
+      <div class="fw-dimension">Key Findings</div>
+      <div class="fw-question">Main results — what is surprising, expected, or contested?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">07</div>
+      <div class="fw-dimension">Theoretical Contributions</div>
+      <div class="fw-question">Does this extend, challenge, or merely replicate existing theory?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">08</div>
+      <div class="fw-dimension">Practical Contributions</div>
+      <div class="fw-question">What do managers and leaders gain? Is it actionable?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">09</div>
+      <div class="fw-dimension">Policy Implications</div>
+      <div class="fw-question">What does this suggest for governments, regulators, institutions — UK or global?</div>
+    </div>
+    <div class="fw-card">
+      <div class="fw-num">10</div>
+      <div class="fw-dimension">Strengths</div>
+      <div class="fw-question">What does this paper do particularly well — rigour, originality, clarity?</div>
+    </div>
+    <div class="fw-card highlight">
+      <div class="fw-num">11</div>
+      <div class="fw-dimension">Weaknesses & Limitations</div>
+      <div class="fw-question">Blind spots, methodological flaws, generalisation issues, potential bias?</div>
+    </div>
+    <div class="fw-card highlight">
+      <div class="fw-num">12</div>
+      <div class="fw-dimension">Research Gaps</div>
+      <div class="fw-question">What future research is called for? What PhD-worthy gaps do YOU spot?</div>
+    </div>
+    <div class="fw-card" style="grid-column: span 2; background: rgba(184,134,11,.1);">
+      <div class="fw-num">13</div>
+      <div class="fw-dimension">Community Verdict</div>
+      <div class="fw-question">Score 1–10. Must-read or skip? Would you cite it? Group consensus vs. dissent — all documented.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CHANNELS -->
+<section id="channels">
+  <div class="channels-header reveal">
+    <div class="section-label"><span class="section-label-line"></span><span class="section-label-text">Digital Channels</span></div>
+    <h2 class="section-heading">Where we <em>connect & share</em></h2>
+  </div>
+  <div class="channels-flex reveal">
+    <div class="channel-row">
+      <div class="channel-icon">💬</div>
+      <div>
+        <div class="channel-name">WhatsApp Group</div>
+        <div class="channel-purpose">Real-time community chat</div>
+      </div>
+      <div class="channel-desc">Event reminders, quick polls, daily reading nudges, member discussions. Core members (max 256). Pinned with monthly journal & house rules.</div>
+      <span class="channel-freq">Daily</span>
+    </div>
+    <div class="channel-row">
+      <div class="channel-icon">📢</div>
+      <div>
+        <div class="channel-name">WhatsApp Channel</div>
+        <div class="channel-purpose">Broadcast announcements</div>
+      </div>
+      <div class="channel-desc">One-way broadcast for monthly journal reveals, event links, podcast drops. Wider subscriber base — no noise.</div>
+      <span class="channel-freq">3–4×/month</span>
+    </div>
+    <div class="channel-row">
+      <div class="channel-icon">💼</div>
+      <div>
+        <div class="channel-name">LinkedIn Page + Newsletter</div>
+        <div class="channel-purpose">Professional visibility & digest</div>
+      </div>
+      <div class="channel-desc">Session summaries, member spotlights, journal insights, post-event recaps. Monthly newsletter with key findings and policy notes.</div>
+      <span class="channel-freq">3×/week</span>
+    </div>
+    <div class="channel-row">
+      <div class="channel-icon">🎙️</div>
+      <div>
+        <div class="channel-name">The Reading Room Podcast</div>
+        <div class="channel-purpose">Audio journal deep-dives</div>
+      </div>
+      <div class="channel-desc">15–25 min monthly episode on the voted article. Aims, methodology, findings, gaps, policy implications — for commuters and busy scholars.</div>
+      <span class="channel-freq">Monthly</span>
+    </div>
+    <div class="channel-row">
+      <div class="channel-icon">🖥️</div>
+      <div>
+        <div class="channel-name">Microsoft Teams / Zoom</div>
+        <div class="channel-purpose">Virtual live events</div>
+      </div>
+      <div class="channel-desc">Monthly reading sessions and the Annual Symposium virtual stream. Recorded and uploaded to members-only Google Drive within 48 hours.</div>
+      <span class="channel-freq">Monthly</span>
+    </div>
+    <div class="channel-row">
+      <div class="channel-icon">📁</div>
+      <div>
+        <div class="channel-name">Google Drive / Notion</div>
+        <div class="channel-purpose">Document repository & dashboard</div>
+      </div>
+      <div class="channel-desc">Members-only access. Reading frameworks, session notes, slide decks, reading challenge leaderboard, annual community report.</div>
+      <span class="channel-freq">Ongoing</span>
+    </div>
+  </div>
+</section>
+
+<!-- ANNUAL SYMPOSIUM -->
+<section id="symposium">
+  <div class="how-grid-bg"></div>
+  <div class="symp-inner">
+    <div class="symp-grid">
+      <div class="symp-left reveal">
+        <div class="section-label"><span class="section-label-line" style="background:rgba(184,134,11,.6)"></span><span class="section-label-text">Annual Event</span></div>
+        <h2 class="section-heading">The Scholarly Roots <em>Annual Symposium</em></h2>
+        <p>A full-day hybrid academic event at the University of Huddersfield. Invited professors, doctoral researcher showcases, collaborative gap-mapping, and the annual community awards.</p>
+        <div class="symp-details">
+          <div class="symp-detail">
+            <span class="symp-detail-icon">📍</span>
+            <div>
+              <div class="symp-detail-label">Venue</div>
+              <div class="symp-detail-val">University of Huddersfield, Business School — Hybrid (In-Person + Virtual)</div>
+            </div>
+          </div>
+          <div class="symp-detail">
+            <span class="symp-detail-icon">🗓️</span>
+            <div>
+              <div class="symp-detail-label">When</div>
+              <div class="symp-detail-val">June 2026 · Full Day 9:00 AM – 5:00 PM</div>
+            </div>
+          </div>
+          <div class="symp-detail">
+            <span class="symp-detail-icon">🎓</span>
+            <div>
+              <div class="symp-detail-label">Keynote Speakers</div>
+              <div class="symp-detail-val">2–3 invited UK professors from ABS 4 / 4★ journals</div>
+            </div>
+          </div>
+          <div class="symp-detail">
+            <span class="symp-detail-icon">💷</span>
+            <div>
+              <div class="symp-detail-label">Cost</div>
+              <div class="symp-detail-val">Free for students · £15–20 for non-student in-person</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="showToast('We\'ll notify you when Symposium registration opens!')">Register Interest</button>
+      </div>
+
+      <div class="reveal">
+        <p style="font-size:.65rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;">Full Day Programme</p>
+        <div class="symp-programme">
+          <div class="prog-item">
+            <span class="prog-time">08:30</span>
+            <div class="prog-activity"><strong>Registration</strong> — Coffee & Networking</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">09:00</span>
+            <div class="prog-activity"><strong>Welcome Address</strong> — Founding Directors + UoH Representative</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">09:30</span>
+            <div class="prog-activity"><strong>Keynote 1</strong> — Invited Professor: "The Future of [Theme] Research: Where Are the Gaps?"</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">10:30</span>
+            <div class="prog-activity"><strong>Coffee Break</strong> & Networking</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">11:00</span>
+            <div class="prog-activity"><strong>Year in Review</strong> — Top 5 journals reviewed: highlights, debates, gaps</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">12:00</span>
+            <div class="prog-activity"><strong>Keynote 2</strong> — Invited Professor: "Bridging Theory and Practice"</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">12:45</span>
+            <div class="prog-activity"><strong>Lunch</strong> & Informal Networking</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">13:45</span>
+            <div class="prog-activity"><strong>Doctoral Showcase</strong> — 3–4 members present research linked to the year's journals</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">14:30</span>
+            <div class="prog-activity"><strong>Keynote 3</strong> — Senior Practitioner: Policy and Industry Implications</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">15:30</span>
+            <div class="prog-activity"><strong>Gap Mapping Workshop</strong> — Groups identify research gaps from the year's reading list → community white paper</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">16:30</span>
+            <div class="prog-activity"><strong>Awards Ceremony</strong> & Closing Remarks</div>
+          </div>
+          <div class="prog-item">
+            <span class="prog-time">19:00</span>
+            <div class="prog-activity"><strong>Optional Networking Dinner</strong> — Local restaurant, self-funded</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOIN -->
+<section id="join">
+  <div class="join-inner">
+    <div class="section-label" style="justify-content:center" class="reveal">
+      <span class="section-label-line"></span>
+      <span class="section-label-text">Join the Community</span>
+      <span class="section-label-line"></span>
+    </div>
+    <h2 class="join-heading reveal">Start reading.<br><em>Start leading.</em></h2>
+    <p class="join-sub reveal">Free to join. Open to all UK doctoral and postgraduate researchers. The only requirement: you still believe reading matters.</p>
+
+    <div class="join-form reveal">
+      <input type="email" class="join-input" id="join-email" placeholder="Your institutional email address">
+      <button class="btn-primary" onclick="handleJoin()">
+        <span>Join Free</span>
+        <span>→</span>
+      </button>
+    </div>
+    <p style="font-size:.72rem;color:var(--ink-soft);margin-top:.7rem;" class="reveal">No spam. Monthly journal announcements + event invites only.</p>
+
+    <div class="join-channels reveal">
+      <button class="join-channel" onclick="showToast('Join our WhatsApp community group!')">
+        <span class="join-channel-icon">💬</span>
+        <span>WhatsApp Group</span>
+      </button>
+      <button class="join-channel" onclick="showToast('Follow our WhatsApp Channel for broadcasts!')">
+        <span class="join-channel-icon">📢</span>
+        <span>WhatsApp Channel</span>
+      </button>
+      <button class="join-channel" onclick="showToast('Follow Scholarly Roots on LinkedIn!')">
+        <span class="join-channel-icon">💼</span>
+        <span>LinkedIn</span>
+      </button>
+      <button class="join-channel" onclick="showToast('Subscribe to The Reading Room on Spotify!')">
+        <span class="join-channel-icon">🎙️</span>
+        <span>Podcast</span>
+      </button>
+      <button class="join-channel" onclick="showToast('Subscribe to our monthly LinkedIn Newsletter!')">
+        <span class="join-channel-icon">📰</span>
+        <span>Newsletter</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-brand">Scholarly Roots</div>
+    <div class="footer-tagline">"Read Deeply. Think Critically. Lead Boldly."</div>
+  </div>
+  <div class="footer-links">
+    <a href="#about">About</a>
+    <a href="#events">Events</a>
+    <a href="#session">Sessions</a>
+    <a href="#symposium">Symposium</a>
+    <a href="#join">Join</a>
+  </div>
+  <div class="footer-copy">© 2025 Scholarly Roots · University of Huddersfield</div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── NAV SCROLL ──
+  window.addEventListener('scroll', () => {
+    document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // ── MOBILE MENU ──
+  function toggleMenu() {
+    document.getElementById('mobile-menu').classList.toggle('open');
+  }
+
+  // ── SCROLL REVEAL ──
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        revealObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // ── VOTE SYSTEM ──
+  let selectedCandidate = null;
+  let hasVoted = false;
+
+  function selectCandidate(index) {
+    if (hasVoted) return;
+    selectedCandidate = index;
+    document.querySelectorAll('.candidate').forEach((c, i) => {
+      c.classList.toggle('selected', i === index);
+    });
+    const btn = document.getElementById('vote-btn');
+    btn.disabled = false;
+    btn.textContent = 'Cast My Vote →';
+  }
+
+  function castVote() {
+    if (selectedCandidate === null || hasVoted) return;
+    hasVoted = true;
+
+    // Get current votes
+    const candidates = document.querySelectorAll('.candidate');
+    const voteCounts = Array.from(candidates).map(c => parseInt(c.dataset.votes) || 0);
+    voteCounts[selectedCandidate] += 1;
+    const total = voteCounts.reduce((a, b) => a + b, 0);
+
+    // Update UI
+    candidates.forEach((c, i) => {
+      const pct = Math.round((voteCounts[i] / total) * 100);
+      c.dataset.votes = voteCounts[i];
+      c.querySelector('.candidate-pct').textContent = pct + '%';
+      c.querySelector('.candidate-bar-fill').style.width = pct + '%';
+      c.querySelector('.candidate-fill').style.width = pct + '%';
+    });
+
+    const btn = document.getElementById('vote-btn');
+    btn.textContent = '✓ Vote Cast — Thank You!';
+    btn.disabled = true;
+    btn.style.background = 'var(--sage)';
+
+    showToast('Your vote has been cast! Results update live.');
+  }
+
+  // ── TOAST ──
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ── JOIN FORM ──
+  function handleJoin() {
+    const email = document.getElementById('join-email').value.trim();
+    if (!email || !email.includes('@')) {
+      showToast('Please enter a valid email address.');
+      return;
+    }
+    showToast('Welcome to Scholarly Roots! Check your inbox for next steps.');
+    document.getElementById('join-email').value = '';
+  }
+
+  // ── HERO CARD ANIMATION ──
+  document.querySelectorAll('.journal-card').forEach((card, i) => {
+    card.style.animationDelay = (1.4 + i * 0.15) + 's';
+  });
+</script>
+</body>
+</html>
